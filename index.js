@@ -18,7 +18,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   //연결할때 사용할 cors..?
   cors: {
-    origin: "process.env.PORT",
+    origin: process.env.PORT,
     method: ["GET", "POST"],
   },
 });
