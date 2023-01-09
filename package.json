@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "pm2 start app.js"
+    "start": "pm2 start index.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
