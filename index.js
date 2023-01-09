@@ -1,7 +1,4 @@
-//require은 임포트 업그레이드 버전?? import > require
-//바벨에서 찍어보면 불안한 경우가 있다 import했을떄 뜨는 에러가 있다@@
 const express = require("express");
-require("dotenv").config();
 const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
@@ -9,45 +6,30 @@ const cors = require("cors");
 
 app.use(cors());
 
-app.use("/", (req, res) => {
-  console.log("연결완료");
-  res.status(200).json("연결완료");
-});
-
-//왜 http가 소켓을 하는데 코드안에 포함되어있을까
-//stomp sub프로토콜
-
-//첫 연결을 위해서 http신을 준비
 const server = http.createServer(app);
-// require로 불러온 class Server의 인스턴스를 만들어주고
 const io = new Server(server, {
-  //연결할때 사용할 cors..?
   cors: {
-    origin: "localhost:3000",
+    origin: "http://localhost:3000",
     method: ["GET", "POST"],
   },
 });
 
+const users = {};
+const socketToRoom = {};
+
+// io.on("connection", (socket) => {
+
+// });
+
 io.on("connection", (socket) => {
-  //   console.log(socket.id);
-
   socket["nickName"] = "익명";
-  // socket.onAny==> 이벤트가 발생할 때 실행될 리스너를 추가
-  // 반대의 개념으로 socket.offAny( [리스너] ) :: 범용 리스너를 제거할 수 있음.
   socket.onAny((e) => {
-    console.log(socket.eventNames());
-    //console.log(socket);
-    //socket.eventNames() 에 리스들에 대한 정의가 배열로 저장됨.
-    //console.log(socket.eventNames());
-
-    //이벤트 발생시 실행된 리스너의 정보 -> (e) 값을 출력.
-    //어떤 리스너를 실행시켰는지 확인 가능하다.
     console.log(`SocketEvent:${e}`);
   });
-  //소켓 io의 가장 큰 장점 c
+  console.log(socket.id);
 
   socket.on("send_message", (data, addMyMessage) => {
-    // console.log(data);
+    console.log(data);
     socket.to(data.room).emit("receive_message", data.msg);
     addMyMessage(data.msg);
   });
@@ -57,11 +39,61 @@ io.on("connection", (socket) => {
     socket.to(data).emit("welcome", socket.nickname);
   });
 
-  socket.on("nickName", (nickname) => {
-    socket["nickName"] = nickname;
+  socket.on("nickName", (nickName) => {
+    socket["nickName"] = nickName;
+  });
+
+  socket.on("whisper", (nickName, msg, addMyMessage) => {
+    const targetSoc = [...io.sockets.sockets];
+    const target = targetSoc.filter((el) => el[1].nickName === nickName);
+    if (target[0][0]) socket.to(target[0][0]).emit("receive_message", msg);
+    addMyMessage(msg);
+  });
+
+  // 화상채팅
+
+  socket.on("joinRtcRoom", (roomID) => {
+    console.log(roomID);
+    if (users[roomID]) {
+      const length = users[roomID].length;
+      if (length === 4) {
+        socket.emit("room full");
+        return;
+      }
+      users[roomID].push(socket.id);
+    } else {
+      users[roomID] = [socket.id];
+    }
+    socketToRoom[socket.id] = roomID;
+    const usersInThisRoom = users[roomID].filter((id) => id !== socket.id);
+
+    socket.emit("all users", usersInThisRoom);
+  });
+
+  socket.on("sending signal", (payload) => {
+    io.to(payload.userToSignal).emit("user joined", {
+      signal: payload.signal,
+      callerID: payload.callerID,
+    });
+  });
+  socket.on("returning signal", (payload) => {
+    io.to(payload.callerID).emit("receiving returned signal", {
+      signal: payload.signal,
+      id: socket.id,
+    });
+  });
+
+  socket.on("disconnect", () => {
+    const roomID = socketToRoom[socket.id];
+    let room = users[roomID];
+    if (room) {
+      room = room.filter((id) => id !== socket.id);
+      users[roomID] = room;
+    }
   });
 });
 
+//http 연결시 3000으로 진행하기 때문에 다른 port 값을 지정한것?
 server.listen(3001, () => {
-  console.log("SErver is Listening");
+  console.log("Server is Listening");
 });
