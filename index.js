@@ -1,6 +1,7 @@
 //require은 임포트 업그레이드 버전?? import > require
 //바벨에서 찍어보면 불안한 경우가 있다 import했을떄 뜨는 에러가 있다@@
 const express = require("express");
+require("dotenv").config();
 const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
@@ -17,7 +18,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   //연결할때 사용할 cors..?
   cors: {
-    origin: "http://sprta-yes.shop",
+    origin: "process.env.PORT",
     method: ["GET", "POST"],
   },
 });
