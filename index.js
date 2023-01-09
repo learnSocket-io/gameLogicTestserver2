@@ -9,6 +9,11 @@ const cors = require("cors");
 
 app.use(cors());
 
+app.use("/", (req, res) => {
+  console.log("연결완료");
+  res.status(200).json("연결완료");
+});
+
 //왜 http가 소켓을 하는데 코드안에 포함되어있을까
 //stomp sub프로토콜
 
@@ -18,7 +23,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   //연결할때 사용할 cors..?
   cors: {
-    origin: "*",
+    origin: "localhost:3000",
     method: ["GET", "POST"],
   },
 });
