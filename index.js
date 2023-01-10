@@ -20,7 +20,7 @@ const connectClient = async () => {
 //redis 쓰기.
 connectClient()
   .then(async () => {
-    await client.set("key", "signal");
+    await client.set("qwerqwerqwer", "연결완료");
     const value = await client.get("key");
     console.log(value);
   })
