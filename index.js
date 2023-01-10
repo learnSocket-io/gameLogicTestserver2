@@ -17,7 +17,7 @@ const connectClient = async () => {
   return await client.connect();
 };
 
-//연결 확인
+//redis 쓰기.
 connectClient()
   .then(async () => {
     await client.set("key", "signal");
@@ -27,6 +27,18 @@ connectClient()
   .catch((err) => {
     console.log(err.message);
   });
+
+//쓰기.
+client.set("qwer", "qwerqwerqwerqwer");
+
+//hoho 에 "field", "value" 를 넣는다.
+// client.hSet("hoho", "field", "value");
+// client.hgetall('friends')
+
+//한개씩 추가해야할 때 + 중복 제거도 해줌.
+// client.sadd('fruits', 'apple', 'orange', 'pear', 'banana', 'apple')
+//client.sadd('fruits', 'lulu')
+// client.smembers('fruits')
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -112,6 +124,11 @@ io.on("connection", (socket) => {
       room = room.filter((id) => id !== socket.id);
       users[roomID] = room;
     }
+  });
+
+  ///testcode
+  socket.on("redisTest", (key, value) => {
+    client.sadd(key, value);
   });
 });
 
