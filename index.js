@@ -136,6 +136,9 @@ io.on("connection", (socket) => {
 
   //게임으로 들어가는 부분
   socket.on("gameStart", (roomId, userId) => {
+    console.log("roomId console", roomId);
+    console.log("userId console", userId);
+    console.log("socket console", socket.id);
     //요청하는 사람의 Id 잡기. 화상 소켓 채팅
     //roomId에 해당하는 유저들의 정보를 찾아서 되돌려준다.
     //게임방에 들어왔을 때
