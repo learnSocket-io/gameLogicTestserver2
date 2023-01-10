@@ -3,6 +3,15 @@ const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+//Set data to Redis
+
+//client.setEx("key_sols", 3600, "test-input");
+
+//console.log("aasdfasdfasdfasdfasdf", client);
 
 app.use(cors());
 
@@ -34,7 +43,7 @@ io.on("connection", (socket) => {
     addMyMessage(data.msg);
   });
 
-  socket.on("join_room", (data) => {
+  socket.on("join_room", (data, userId) => {
     socket.join(data);
     socket.to(data).emit("welcome", socket.nickname);
   });
@@ -51,9 +60,9 @@ io.on("connection", (socket) => {
   });
 
   // 화상채팅
-
-  socket.on("joinRtcRoom", (roomID) => {
+  socket.on("joinRtcRoom", (roomID, userId) => {
     console.log(roomID);
+
     if (users[roomID]) {
       const length = users[roomID].length;
       if (length === 4) {
