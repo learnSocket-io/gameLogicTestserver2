@@ -86,6 +86,13 @@ const data = {
   ],
 };
 
+//변수 설정 부분
+let whiteCard = 0;
+let blackCardList = [[12], [12]];
+let whiteCardList = [[12], [12]];
+
+//함수 설정 부분
+
 io.on("connection", (socket) => {
   socket["nickName"] = "익명";
   socket.onAny(async (e) => {
@@ -183,8 +190,53 @@ io.on("connection", (socket) => {
 
   //첫 패를 선택하는 부분
   socket.on("selectFirstCard", (userId, black) => {
-    console.log(userId);
-    console.log(black);
+    console.log(userId); // userId
+    console.log(black); // black card의 수
+
+    //흰색 카드의 수 설정.
+    const whiteCard = 3 - Number(black);
+
+    let count = 0;
+    let arr1 = [];
+    for (let i = 0; count < 3; i++) {
+      const number = Math.floor(Math.random() * 13);
+      if (blackCardList[number] === null) {
+        blackCardList[number] = userId;
+        arr1 = [...arr1, { color: "black", value: number }];
+        count++;
+      }
+    }
+
+    count = 0;
+    for (let i = 0; count < 3; i++) {
+      number = Math.floor(Math.random() * 13);
+
+      if (whiteCardList[number] === null) {
+        whiteCardList[number] = userId;
+        arr1 = [...arr1, { color: "white", value: number }];
+        count++;
+      }
+    }
+
+    socket["card"] = arr1;
+
+    console.log(
+      socket.card
+        .sort((a, b) => a.value - b.value)
+        .sort((a, b) => {
+          if (a.value === b.value) {
+            if (a.color < b.color) return -1;
+            else if (b.color < a.color) return 1;
+            else return 0;
+          }
+        })
+    );
+
+    //userId가 있는 roomId 에도 뿌려줘야한다.
+    //마지막 함수를 통해서 param을 던져줘야한다.
+    // TODO: 한줄씩 가자.
+    // TODO: endstate 말고 구현이 먼저
+    // TODO: code가 이쁜건 나중에 리팩토링
   });
 });
 
