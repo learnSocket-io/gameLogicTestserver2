@@ -4,16 +4,29 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const { createClient } = require("redis");
 
 dotenv.config();
-
-//Set data to Redis
-
-//client.setEx("key_sols", 3600, "test-input");
-
-//console.log("aasdfasdfasdfasdfasdf", client);
-
 app.use(cors());
+
+//redis 기본 정리 및 연결 시작
+const client = createClient({
+  url: process.env.REDIS_HOST,
+});
+const connectClient = async () => {
+  return await client.connect();
+};
+
+//연결 확인
+connectClient()
+  .then(async () => {
+    await client.set("key", "signal");
+    const value = await client.get("key");
+    console.log(value);
+  })
+  .catch((err) => {
+    console.log(err.message);
+  });
 
 const server = http.createServer(app);
 const io = new Server(server, {
