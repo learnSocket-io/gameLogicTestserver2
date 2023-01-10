@@ -125,7 +125,7 @@ io.on("connection", (socket) => {
       users[roomID] = room;
     }
   });
-
+  client.set("yes", "test redis from yes");
   ///testcode
   socket.on("redisTest", (key, value) => {
     console.log("key 값: ", key);
