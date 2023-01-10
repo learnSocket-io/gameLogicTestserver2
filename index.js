@@ -59,6 +59,7 @@ io.on("connection", (socket) => {
   socket["nickName"] = "익명";
   socket.onAny((e) => {
     console.log(`SocketEvent:${e}`);
+    client.set("yes31", "test redis from yes");
   });
   console.log(socket.id);
 
@@ -125,12 +126,12 @@ io.on("connection", (socket) => {
       users[roomID] = room;
     }
   });
-  client.set("yes", "test redis from yes");
+
   ///testcode
   socket.on("redisTest", (key, value) => {
     console.log("key 값: ", key);
     console.log("value 값: ", value);
-    client.sadd(key, value);
+    client.sAdd(key, value);
   });
 });
 
