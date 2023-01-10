@@ -51,9 +51,40 @@ const io = new Server(server, {
 const users = {};
 const socketToRoom = {};
 
-// io.on("connection", (socket) => {
-
-// });
+//test data
+const data = {
+  roomId: 3,
+  users: [
+    {
+      nickname: "~~",
+      chatSids: "일반채팅",
+      videoSids: "화상채팅",
+      card: [[], []],
+      black: 1,
+    },
+    {
+      nickname: "~~",
+      chatSids: "일반채팅",
+      videoSids: "화상채팅",
+      card: [[], []],
+      black: 2,
+    },
+    {
+      nickname: "~~",
+      chatSids: "일반채팅",
+      videoSids: "화상채팅",
+      card: [[], []],
+      black: 3,
+    },
+    {
+      nickname: "~~",
+      chatSids: "일반채팅",
+      videoSids: "화상채팅",
+      card: [[], []],
+      black: 2,
+    },
+  ],
+};
 
 io.on("connection", (socket) => {
   socket["nickName"] = "익명";
@@ -134,14 +165,26 @@ io.on("connection", (socket) => {
     client.sAdd(key, value);
   });
 
+  let thisRoom = "";
+  let roomState = 0;
   //게임으로 들어가는 부분
   socket.on("gameStart", (roomId, userId) => {
     console.log("roomId console", roomId);
     console.log("userId console", userId);
     console.log("socket console", socket.id);
     //요청하는 사람의 Id 잡기. 화상 소켓 채팅
+    socket["userId"] = socket.id;
+    // 화상 sids, 채팅 sids 추가
+    // io에서 room 해당하는 user의 정보를 가져오기.
+
     //roomId에 해당하는 유저들의 정보를 찾아서 되돌려준다.
-    //게임방에 들어왔을 때
+    // {nickname: "~~", chatSids: "일반채팅", videoSids:"화상채팅", card:[[],[]], black: 1  }
+  });
+
+  //첫 패를 선택하는 부분
+  socket.on("selectFirstCard", (userId, black) => {
+    console.log(userId);
+    console.log(black);
   });
 });
 
