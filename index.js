@@ -128,6 +128,8 @@ io.on("connection", (socket) => {
 
   ///testcode
   socket.on("redisTest", (key, value) => {
+    console.log("key 값: ", key);
+    console.log("value 값: ", value);
     client.sadd(key, value);
   });
 });
