@@ -1,7 +1,7 @@
 // Check the connection status of the Redis client instance.
-
+const dotenv = require("dotenv");
 const { createClient } = require("redis");
-
+dotenv.config();
 //EC2에서 연결할때는 경로 분기를 바꿔줘야한다.
 const client = createClient({
   url: process.env.REDIS_HOST,
@@ -22,11 +22,15 @@ connectClient()
     console.log(err.message);
   });
 
-
-
-console.log(
-  `client.isOpen: ${client.isOpen}, client.isReady: ${client.isReady}`
-);
+const write = async () => {
+  await client.hSet("key", "123", "value");
+  const tets = await client.hGetAll("key");
+  console.log(tets);
+};
+write;
+// console.log(
+//   `client.isOpen: ${client.isOpen}, client.isReady: ${client.isReady}`
+// );
 
 //await connectPromise;
 // console.log("Afer connectPromise has resolved...");
