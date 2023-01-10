@@ -21,7 +21,7 @@ const connectClient = async () => {
 connectClient()
   .then(async () => {
     await client.set("qwerqwerqwer", "연결완료");
-    const value = await client.get("key");
+    const value = await client.get("qwerqwerqwer");
     console.log(value);
   })
   .catch((err) => {
