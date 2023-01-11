@@ -1,3 +1,7 @@
+// TODO: 한줄씩 가자.
+// TODO: endstate 말고 구현이 먼저
+// TODO: code가 이쁜건 나중에 리팩토링
+
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -213,16 +217,23 @@ io.on("connection", (socket) => {
 
   //NOTE: 게임 로직 구현
   //첫 패를 선택하는 부분
-  socket.on("selectFirstCard", (userId, black, addMyCard) => {
+  socket.on("selectFirstCard", ({userId, black, roomId}, addMyCard) => {
     console.log("카드를 받아간 user의 정보:", userId);
+    console.log("userId",userId);
+    console.log("black",black);
+    console.log("roomId",roomId);
 
+
+    //const a = socket.adapter.rooms
+    //TODO: 개인 SIDS로 socket.adapter.rooms 안에 있는 roomID 뽑아보기
+    //console.log("구하고 있는 값:",[...a][3][0]);
+    //console.log(socket.id); //개인의 sids
     //흰색 카드의 수 설정.
-
-    const whiteCard = 3 - black.black;
+    const whiteCard = 3 - black;
 
     let count = 0;
     let arr1 = [];
-    for (let i = 0; count < black.black; i++) {
+    for (let i = 0; count < black; i++) {
       const number = Math.floor(Math.random() * 12); //시작할때는 조커가 없어야한다.
       if (blackCardList[number] === null) {
         blackCardList[number] = userId;
@@ -244,38 +255,38 @@ io.on("connection", (socket) => {
 
     socket["card"] = arr1;
 
-    console.log(
-      socket.card
-        .sort((a, b) => a.value - b.value)
-        .sort((a, b) => {
-          if (a.value === b.value) {
-            if (a.color < b.color) return -1;
-            else if (b.color < a.color) return 1;
-            else return 0;
-          }
-        })
-    );
+    socket.card
+      .sort((a, b) => a.value - b.value)
+      .sort((a, b) => {
+        if (a.value === b.value) {
+          if (a.color < b.color) return -1;
+          else if (b.color < a.color) return 1;
+          else return 0;
+        }
+      });
+
     //유저들의 전체 카드에 대한 정보를 쏴줘야한다.
-    const userIdAndCard = { userId: userId.userId, card: [socket.card] };
+    
+    const userIdAndCard = { userId, card:socket.card };
+    
     gamingUser = [...gamingUser, userIdAndCard];
-    console.log("게임유저 저장되는것 확인:", gamingUser);
-    console.log("length:", gamingUser.length);
+    console.log(gamingUser);
+    //console.log("게임유저 저장되는것 확인:", gamingUser);
+    //console.log("length:", gamingUser.length);
 
     //test를 위한 값 살려놓기
-    
+
     //FIXME: to.("roomId")가 빠져있음.
     if (gamingUser.length === 4) {
-      console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-      socket.broadcast.emit("allUsersFirstCard", gamingUser);
+      //FIXME: room
+      //진행자에 대한 추가 정보가 필요.
+      socket.to(roomId).emit("allUsersFirstCard", gamingUser);
     }
-
-    //userId가 있는 roomId 에도 뿌려줘야한다.
-    //마지막 함수를 통해서 param을 던져줘야한다.
-    // TODO: 한줄씩 가자.
-    // TODO: endstate 말고 구현이 먼저
-    // TODO: code가 이쁜건 나중에 리팩토링
   });
+  //user nickname
+  //cache 에서 user의 순서를 받아와서 전송
 
+  //진행자의 순서에 대한 정보가 필요하다.
   //타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
   socket.on("selectCard", (userId, black) => {
     if (black) {
