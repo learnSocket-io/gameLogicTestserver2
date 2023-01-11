@@ -261,12 +261,10 @@ io.on("connection", (socket) => {
     gamingUser = [...gamingUser, userIdAndCard];
     console.log("게임유저 저장되는것 확인:", gamingUser);
 
+    //FIXME: to.("roomId")가 빠져있음.
     if (gamingUser.length === 4) {
       socket.emit("allUsersFirstCard", gamingUser);
     }
-    //보내주는 CODE
-    //addMyCard(socket.card);
-    //socket.emit('otherUsersCard', {userId}, socket.card)
 
     //userId가 있는 roomId 에도 뿌려줘야한다.
     //마지막 함수를 통해서 param을 던져줘야한다.
@@ -274,6 +272,19 @@ io.on("connection", (socket) => {
     // TODO: endstate 말고 구현이 먼저
     // TODO: code가 이쁜건 나중에 리팩토링
   });
+
+  //상대를 지목하는 기능
+  //지목한 상대의 카드들에 대한 정보를 보내줘야 한다.
+  socket.on("selectUser", (userId, getCard) => {
+    for (i = 0; i < gamingUser.length; i++) {
+      if (gamingUser[i].userId == userId) {
+        getCard(gamingUser[i]);
+        break;
+      }
+    }
+  });
+
+  
 });
 
 //http 연결시 3000으로 진행하기 때문에 다른 port 값을 지정한것?
