@@ -214,8 +214,7 @@ io.on("connection", (socket) => {
   //NOTE: 게임 로직 구현
   //첫 패를 선택하는 부분
   socket.on("selectFirstCard", (userId, black, addMyCard) => {
-    console.log("입력 받은 userId", userId); // userId
-    console.log("입력 받은 black수", black); // black card의 수
+    console.log("카드를 받아간 user의 정보:", userId);
 
     //흰색 카드의 수 설정.
 
@@ -260,11 +259,13 @@ io.on("connection", (socket) => {
     const userIdAndCard = { userId: userId.userId, card: [socket.card] };
     gamingUser = [...gamingUser, userIdAndCard];
     console.log("게임유저 저장되는것 확인:", gamingUser);
+    console.log("length:", gamingUser.length);
 
     //test를 위한 값 살려놓기
-    addMyCard(socket.car)
+    
     //FIXME: to.("roomId")가 빠져있음.
     if (gamingUser.length === 4) {
+      console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
       socket.emit("allUsersFirstCard", gamingUser);
     }
 
@@ -283,10 +284,10 @@ io.on("connection", (socket) => {
       let arr1 = [];
       for (let i = 0; count < 1; i++) {
         //FIXME: 가지고 있는 값 내에서 랜덤을 가져오도록 구현하면 서버에 부담이 줄것이라 생각
-        const number = Math.floor(Math.random() * 13); 
+        const number = Math.floor(Math.random() * 13);
         if (blackCardList[number] === null) {
           blackCardList[number] = userId;
-          
+
           count++;
         }
       }
