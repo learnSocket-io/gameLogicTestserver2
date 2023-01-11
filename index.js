@@ -261,6 +261,8 @@ io.on("connection", (socket) => {
     gamingUser = [...gamingUser, userIdAndCard];
     console.log("게임유저 저장되는것 확인:", gamingUser);
 
+    //test를 위한 값 살려놓기
+    addMyCard(socket.car)
     //FIXME: to.("roomId")가 빠져있음.
     if (gamingUser.length === 4) {
       socket.emit("allUsersFirstCard", gamingUser);
@@ -273,6 +275,26 @@ io.on("connection", (socket) => {
     // TODO: code가 이쁜건 나중에 리팩토링
   });
 
+  //타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
+  socket.on("selectCard", (userId, black) => {
+    if (black) {
+      //black인 경우
+      let count = 0;
+      let arr1 = [];
+      for (let i = 0; count < 1; i++) {
+        //FIXME: 가지고 있는 값 내에서 랜덤을 가져오도록 구현하면 서버에 부담이 줄것이라 생각
+        const number = Math.floor(Math.random() * 13); 
+        if (blackCardList[number] === null) {
+          blackCardList[number] = userId;
+          
+          count++;
+        }
+      }
+    } else {
+      //white인 경우
+    }
+  });
+
   //상대를 지목하는 기능
   //지목한 상대의 카드들에 대한 정보를 보내줘야 한다.
   socket.on("selectUser", (userId, getCard) => {
@@ -283,8 +305,6 @@ io.on("connection", (socket) => {
       }
     }
   });
-
-  
 });
 
 //http 연결시 3000으로 진행하기 때문에 다른 port 값을 지정한것?
