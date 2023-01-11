@@ -9,6 +9,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { createClient } = require("redis");
+const { log } = require("console");
 
 dotenv.config();
 app.use(cors());
@@ -56,36 +57,34 @@ const users = {};
 const socketToRoom = {};
 
 //test data
-const data = {
+
+const data = [];
+const data2 = {
   roomId: 3,
   users: [
     {
-      nickname: "~~",
-      chatSids: "일반채팅",
+      userId: 1,
+      gameSids: "일반채팅",
       videoSids: "화상채팅",
-      card: [[], []],
-      black: 1,
+      card: [],
     },
     {
-      nickname: "~~",
-      chatSids: "일반채팅",
+      userId: 3,
+      gameSids: "일반채팅",
       videoSids: "화상채팅",
-      card: [[], []],
-      black: 2,
+      card: [],
     },
     {
-      nickname: "~~",
-      chatSids: "일반채팅",
+      userId: 19,
+      gameSids: "일반채팅",
       videoSids: "화상채팅",
-      card: [[], []],
-      black: 3,
+      card: [],
     },
     {
-      nickname: "~~",
-      chatSids: "일반채팅",
+      userId: 33,
+      gameSids: "일반채팅",
       videoSids: "화상채팅",
-      card: [[], []],
-      black: 2,
+      card: [],
     },
   ],
 };
@@ -129,12 +128,22 @@ let gamingUser = [];
 //NOTE:
 //console.log(socket.id); sids정보
 
+//data = {
+
+//   users:[
+//    {
+//     userId: 1,
+//     gameSids: "일반채팅",
+//     videoSids: "화상채팅",
+//   },
+// };
+//
+
 //NOTE: SOCKET IO 시작 부분
 io.on("connection", (socket) => {
   socket["nickName"] = "익명";
-  socket.onAny(async (e) => {
+  socket.onAny((e) => {
     console.log(`SocketEvent:${e}`);
-    await client.set("yes31", "test redis from yes");
   });
 
   socket.on("send_message", (data, addMyMessage) => {
@@ -143,9 +152,14 @@ io.on("connection", (socket) => {
     addMyMessage(data.msg);
   });
 
-  socket.on("join_room", (data, userId) => {
-    socket.join(data);
-    socket.to(data).emit("welcome", socket.nickname);
+  socket.on("join_room", ({ roomId, userId }) => {
+    socket.join(roomId);
+    const sample = { userId, gameSids: socket.id };
+    //순서 정하기.  //join_room , -> rtc_room
+    data.push(sample);
+    console.log("입력한 data 값 보기", data);
+
+    socket.to(roomId).emit("welcome", socket.nickname);
   });
 
   socket.on("nickName", (nickName) => {
@@ -162,6 +176,11 @@ io.on("connection", (socket) => {
   //NOTE: 화상채팅
   socket.on("joinRtcRoom", (roomID, userId) => {
     console.log(roomID);
+    //socket.id 랑 userId를 묶어준다
+    
+    
+    
+   
 
     if (users[roomID]) {
       const length = users[roomID].length;
@@ -201,28 +220,29 @@ io.on("connection", (socket) => {
     }
   });
 
-  //NOTE: 게임으로 들어가는 부분
+  //NOTE: 대기방 -> 게임방 으로 입장. 입력받은 룸으로 매칭.
   socket.on("gameStart", (roomId, userId) => {
     console.log("roomId console", roomId);
     console.log("userId console", userId);
     console.log("socket console", socket.id);
+    //시그널링으로 들어오는 것들을 묶어줘야한다.
+
     //요청하는 사람의 Id 잡기. 화상 소켓 채팅
     socket["userId"] = socket.id;
     // 화상 sids, 채팅 sids 추가
     // io에서 room 해당하는 user의 정보를 가져오기.
 
     //roomId에 해당하는 유저들의 정보를 찾아서 되돌려준다.
-    // {nickname: "~~", chatSids: "일반채팅", videoSids:"화상채팅", card:[[],[]], black: 1  }
+    // {nickname: "~~", socket.id: "일반채팅+게임", videoSids:"화상채팅", card:[[],[]], black: 1  }
   });
 
   //NOTE: 게임 로직 구현
   //첫 패를 선택하는 부분
-  socket.on("selectFirstCard", ({userId, black, roomId}, addMyCard) => {
+  socket.on("selectFirstCard", ({ userId, black, roomId }, addMyCard) => {
     console.log("카드를 받아간 user의 정보:", userId);
-    console.log("userId",userId);
-    console.log("black",black);
-    console.log("roomId",roomId);
-
+    console.log("userId", userId);
+    console.log("black", black);
+    console.log("roomId", roomId);
 
     //const a = socket.adapter.rooms
     //TODO: 개인 SIDS로 socket.adapter.rooms 안에 있는 roomID 뽑아보기
@@ -266,9 +286,9 @@ io.on("connection", (socket) => {
       });
 
     //유저들의 전체 카드에 대한 정보를 쏴줘야한다.
-    
-    const userIdAndCard = { userId, card:socket.card };
-    
+
+    const userIdAndCard = { userId, card: socket.card };
+
     gamingUser = [...gamingUser, userIdAndCard];
     console.log(gamingUser);
     //console.log("게임유저 저장되는것 확인:", gamingUser);
@@ -276,15 +296,13 @@ io.on("connection", (socket) => {
 
     //test를 위한 값 살려놓기
 
-    //FIXME: to.("roomId")가 빠져있음.
     if (gamingUser.length === 4) {
-      //FIXME: room
       //진행자에 대한 추가 정보가 필요.
+      //user nickname
+      //cache 에서 user의 순서를 받아와서 전송
       socket.to(roomId).emit("allUsersFirstCard", gamingUser);
     }
   });
-  //user nickname
-  //cache 에서 user의 순서를 받아와서 전송
 
   //진행자의 순서에 대한 정보가 필요하다.
   //타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
@@ -304,6 +322,16 @@ io.on("connection", (socket) => {
       }
     } else {
       //white인 경우
+      count = 0;
+      for (let i = 0; count < 1; i++) {
+        number = Math.floor(Math.random() * 13);
+
+        if (whiteCardList[number] === null) {
+          whiteCardList[number] = userId;
+          arr1 = [...arr1, { color: "white", value: number }];
+          count++;
+        }
+      }
     }
   });
 
