@@ -17,7 +17,7 @@ const connectClient = async () => {
   return await client.connect();
 };
 
-//redis 쓰기.
+//FIXME: redis 쓰기.
 connectClient()
   .then(async () => {
     await client.set("qwerqwerqwer", "연결완료");
@@ -86,20 +86,51 @@ const data = {
   ],
 };
 
-//변수 설정 부분
+//NOTE: 변수 설정 부분
 let whiteCard = 0;
-let blackCardList = [[12], [12]];
-let whiteCardList = [[12], [12]];
+let blackCardList = [
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+];
+let whiteCardList = [
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+];
+let thisRoom = "";
+let roomState = 0;
 
-//함수 설정 부분
+//NOTE:
+//console.log(socket.id); sids정보
 
+//NOTE: SOCKET IO 시작 부분
 io.on("connection", (socket) => {
   socket["nickName"] = "익명";
   socket.onAny(async (e) => {
     console.log(`SocketEvent:${e}`);
     await client.set("yes31", "test redis from yes");
   });
-  console.log(socket.id);
 
   socket.on("send_message", (data, addMyMessage) => {
     console.log(data);
@@ -123,7 +154,7 @@ io.on("connection", (socket) => {
     addMyMessage(msg);
   });
 
-  // 화상채팅
+  //NOTE: 화상채팅
   socket.on("joinRtcRoom", (roomID, userId) => {
     console.log(roomID);
 
@@ -165,16 +196,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  ///testcode
-  socket.on("redisTest", (key, value) => {
-    console.log("key 값: ", key);
-    console.log("value 값: ", value);
-    client.sAdd(key, value);
-  });
-
-  let thisRoom = "";
-  let roomState = 0;
-  //게임으로 들어가는 부분
+  //NOTE: 게임으로 들어가는 부분
   socket.on("gameStart", (roomId, userId) => {
     console.log("roomId console", roomId);
     console.log("userId console", userId);
@@ -188,18 +210,20 @@ io.on("connection", (socket) => {
     // {nickname: "~~", chatSids: "일반채팅", videoSids:"화상채팅", card:[[],[]], black: 1  }
   });
 
+  //NOTE: 게임 로직 구현
   //첫 패를 선택하는 부분
-  socket.on("selectFirstCard", (userId, black) => {
-    console.log(userId); // userId
-    console.log(black); // black card의 수
+  socket.on("selectFirstCard", (userId, black, addMyCard) => {
+    console.log("입력 받은 userId",userId); // userId
+    console.log("입력 받은 black수",black); // black card의 수
 
     //흰색 카드의 수 설정.
-    const whiteCard = 3 - Number(black);
-
+    
+    const whiteCard = 3 - black.black;
+   
     let count = 0;
     let arr1 = [];
-    for (let i = 0; count < 3; i++) {
-      const number = Math.floor(Math.random() * 13);
+    for (let i = 0; count < black.black; i++) {
+      const number = Math.floor(Math.random() * 12); //시작할때는 조커가 없어야한다.
       if (blackCardList[number] === null) {
         blackCardList[number] = userId;
         arr1 = [...arr1, { color: "black", value: number }];
@@ -208,8 +232,8 @@ io.on("connection", (socket) => {
     }
 
     count = 0;
-    for (let i = 0; count < 3; i++) {
-      number = Math.floor(Math.random() * 13);
+    for (let i = 0; count < whiteCard; i++) {
+      number = Math.floor(Math.random() * 12);
 
       if (whiteCardList[number] === null) {
         whiteCardList[number] = userId;
@@ -231,6 +255,9 @@ io.on("connection", (socket) => {
           }
         })
     );
+    
+    addMyCard(socket.card);
+
 
     //userId가 있는 roomId 에도 뿌려줘야한다.
     //마지막 함수를 통해서 param을 던져줘야한다.
