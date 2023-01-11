@@ -120,6 +120,7 @@ let whiteCardList = [
 ];
 let thisRoom = "";
 let roomState = 0;
+let gamingUser = [];
 
 //NOTE:
 //console.log(socket.id); sids정보
@@ -213,13 +214,13 @@ io.on("connection", (socket) => {
   //NOTE: 게임 로직 구현
   //첫 패를 선택하는 부분
   socket.on("selectFirstCard", (userId, black, addMyCard) => {
-    console.log("입력 받은 userId",userId); // userId
-    console.log("입력 받은 black수",black); // black card의 수
+    console.log("입력 받은 userId", userId); // userId
+    console.log("입력 받은 black수", black); // black card의 수
 
     //흰색 카드의 수 설정.
-    
+
     const whiteCard = 3 - black.black;
-   
+
     let count = 0;
     let arr1 = [];
     for (let i = 0; count < black.black; i++) {
@@ -255,9 +256,17 @@ io.on("connection", (socket) => {
           }
         })
     );
-    
-    addMyCard(socket.card);
+    //유저들의 전체 카드에 대한 정보를 쏴줘야한다.
+    const userIdAndCard = { userId: userId.userId, card: [socket.card] };
+    gamingUser = [...gamingUser, userIdAndCard];
+    console.log("게임유저 저장되는것 확인:", gamingUser);
 
+    if (gamingUser.length === 4) {
+      socket.emit("allUsersCard", gamingUser);
+    }
+    //보내주는 CODE
+    //addMyCard(socket.card);
+    //socket.emit('otherUsersCard', {userId}, socket.card)
 
     //userId가 있는 roomId 에도 뿌려줘야한다.
     //마지막 함수를 통해서 param을 던져줘야한다.
