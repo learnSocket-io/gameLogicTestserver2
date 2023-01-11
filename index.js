@@ -262,7 +262,7 @@ io.on("connection", (socket) => {
     console.log("게임유저 저장되는것 확인:", gamingUser);
 
     if (gamingUser.length === 4) {
-      socket.emit("allUsersCard", gamingUser);
+      socket.emit("allUsersFirstCard", gamingUser);
     }
     //보내주는 CODE
     //addMyCard(socket.card);
