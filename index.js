@@ -266,7 +266,7 @@ io.on("connection", (socket) => {
     //FIXME: to.("roomId")가 빠져있음.
     if (gamingUser.length === 4) {
       console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-      socket.emit("allUsersFirstCard", gamingUser);
+      socket.broadcast.emit("allUsersFirstCard", gamingUser);
     }
 
     //userId가 있는 roomId 에도 뿌려줘야한다.
