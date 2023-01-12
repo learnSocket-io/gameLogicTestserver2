@@ -42,7 +42,7 @@ client.set("qwer", "qwerqwerqwerqwer");
 
 //한개씩 추가해야할 때 + 중복 제거도 해줌.
 // client.sadd('fruits', 'apple', 'orange', 'pear', 'banana', 'apple')
-//client.sadd('fruits', 'lulu')
+// client.sadd('fruits', 'lulu')
 // client.smembers('fruits')
 
 const server = http.createServer(app);
@@ -128,15 +128,13 @@ let gamingUser = [];
 //NOTE:
 //console.log(socket.id); sids정보
 
-//data = {
-
-//   users:[
+//data = [
 //    {
 //     userId: 1,
 //     gameSids: "일반채팅",
 //     videoSids: "화상채팅",
 //   },
-// };
+// ]
 //
 
 //NOTE: SOCKET IO 시작 부분
@@ -155,7 +153,6 @@ io.on("connection", (socket) => {
   socket.on("join_room", ({ roomId, userId }) => {
     socket.join(roomId);
     const sample = { userId, gameSids: socket.id };
-    //순서 정하기.  //join_room , -> rtc_room
     data.push(sample);
     console.log("입력한 data 값 보기", data);
 
@@ -177,10 +174,12 @@ io.on("connection", (socket) => {
   socket.on("joinRtcRoom", (roomID, userId) => {
     console.log(roomID);
     //socket.id 랑 userId를 묶어준다
-    
-    
-    
-   
+    data.forEach((el) => {
+      if (el.userId == userId) {
+        el.videoSids = socket.id;
+        return false; // forEach문 종료하기.
+      }
+    });
 
     if (users[roomID]) {
       const length = users[roomID].length;
@@ -222,10 +221,7 @@ io.on("connection", (socket) => {
 
   //NOTE: 대기방 -> 게임방 으로 입장. 입력받은 룸으로 매칭.
   socket.on("gameStart", (roomId, userId) => {
-    console.log("roomId console", roomId);
-    console.log("userId console", userId);
-    console.log("socket console", socket.id);
-    //시그널링으로 들어오는 것들을 묶어줘야한다.
+    //FIXME 시그널링으로 들어오는 것들을 묶어줘야한다???
 
     //요청하는 사람의 Id 잡기. 화상 소켓 채팅
     socket["userId"] = socket.id;
