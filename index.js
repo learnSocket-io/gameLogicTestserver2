@@ -1,6 +1,4 @@
-// TODO: 한줄씩 가자.
-// TODO: endstate 말고 구현이 먼저
-// TODO: code가 이쁜건 나중에 리팩토링
+
 //redis-cli -h redis-game-ro.rbvg10.ng.0001.apn2.cache.amazonaws.com
 const express = require("express");
 const app = express();
