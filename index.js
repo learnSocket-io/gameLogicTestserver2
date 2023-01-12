@@ -128,31 +128,24 @@ let gamingUser = [];
 //NOTE:
 //console.log(socket.id); sids정보
 
-//data = [
-//    {
-//     userId: 1,
-//     gameSids: "일반채팅",
-//     videoSids: "화상채팅",
-//   },
-// ]
-//
+
 //NOTE: SOCKET IO 시작 부분
 io.on("connection", (socket) => {
   socket["nickName"] = "익명";
   socket.onAny(async (e) => {
     console.log(`SocketEvent:${e}`);
 
-    await client.sAdd("fruits", "apple", "orange", "pear", "banana", "apple");
-    await client.sAdd("fruits", "lulu");
-    client.sMembers("fruits", function(err,data){console.log(data)});
+    // await client.sAdd("fruits", "apple", "orange", "pear", "banana", "apple");
+    // await client.sAdd("fruits", "lulu");
+    
     
 
     //비동기 형식으로 접근해야만 함.
-    // await client.set("testCode", "test msg");
-    // const testCode = await client.get("testCode");
-    // console.log("testcode 대한 값 표현", testCode);
-    // const qwer = await client.get("qwer");
-    // console.log("qwer에 대한 값 표현", qwer);
+    // await client.set("testCode", "test msg");  ---- O
+    // const testCode = await client.get("testCode");  ---- O
+    // console.log("testcode 대한 값 표현", testCode);  ---- O
+    // const qwer = await client.get("qwer");  ---- O
+    // console.log("qwer에 대한 값 표현", qwer);  ---- O
   });
 
   socket.on("send_message", (data, addMyMessage) => {
