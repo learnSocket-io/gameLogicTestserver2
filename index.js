@@ -1,7 +1,7 @@
 // TODO: 한줄씩 가자.
 // TODO: endstate 말고 구현이 먼저
 // TODO: code가 이쁜건 나중에 리팩토링
-
+//redis-cli -h redis-game-ro.rbvg10.ng.0001.apn2.cache.amazonaws.com
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -56,7 +56,7 @@ const io = new Server(server, {
 const users = {};
 const socketToRoom = {};
 
-//test data
+//test code
 
 const data = [];
 const data2 = {
@@ -136,12 +136,23 @@ let gamingUser = [];
 //   },
 // ]
 //
-
 //NOTE: SOCKET IO 시작 부분
 io.on("connection", (socket) => {
   socket["nickName"] = "익명";
-  socket.onAny((e) => {
+  socket.onAny(async (e) => {
     console.log(`SocketEvent:${e}`);
+
+    await client.sAdd("fruits", "apple", "orange", "pear", "banana", "apple");
+    await client.sAdd("fruits", "lulu");
+    client.sMembers("fruits", function(err,data){console.log(data)});
+    
+
+    //비동기 형식으로 접근해야만 함.
+    // await client.set("testCode", "test msg");
+    // const testCode = await client.get("testCode");
+    // console.log("testcode 대한 값 표현", testCode);
+    // const qwer = await client.get("qwer");
+    // console.log("qwer에 대한 값 표현", qwer);
   });
 
   socket.on("send_message", (data, addMyMessage) => {
