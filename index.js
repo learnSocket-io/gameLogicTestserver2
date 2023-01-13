@@ -190,8 +190,9 @@ io.on("connection", (socket) => {
       ],
       roomData: [{ userId, gameSids: socket.id }],
     };
+
     data.push(sample);
-    console.log("입력한 data 값 보기", data);
+    console.log("입력한 data 값 보기", data[0].roomData); //데이터 잘 들어간 것까지 확인.
 
     socket.to(roomId).emit("welcome", socket.nickname);
   });
@@ -209,12 +210,18 @@ io.on("connection", (socket) => {
 
   //NOTE: 화상채팅
   socket.on("joinRtcRoom", (roomID, userId) => {
-    console.log(roomID);
     //socket.id 랑 userId를 묶어준다
-    data.forEach((el) => {
-      if (el.userId == userId) {
-        el.videoSids = socket.id;
-        return false; // forEach문 종료하기.
+    // data.forEach((el) => {
+    //   if (el.userId == userId) {
+    //     el.videoSids = socket.id;
+    //     return false; // forEach문 종료하기.
+    //   }
+    // });
+    data.map((el) => {
+      if (el.roomId === roomId) {
+        if (el.roomData.userId === userId) {
+          el.roomData.videoSids = socket.id;
+        }
       }
     });
 
@@ -267,25 +274,25 @@ io.on("connection", (socket) => {
   //NOTE: 게임 로직 구현
   //첫 패를 선택하는 부분
   socket.on("selectFirstCard", ({ userId, black, roomId }, addMyCard) => {
-    //console.log("카드를 받아간 user의 정보:", userId);
-    //console.log("userId", userId);
-    //console.log("black", black);
-    //console.log("roomId", roomId);
-
-    //const a = socket.adapter.rooms
-    //TODO: 개인 SIDS로 socket.adapter.rooms 안에 있는 roomID 뽑아보기
-    //console.log("구하고 있는 값:",[...a][3][0]);
-    //console.log(socket.id); //개인의 sids
     //흰색 카드의 수 설정.
     const whiteCard = 3 - black;
 
     //카드를 먼저 선택해준 후.
     let count = 0;
     let arr1 = [];
+    let flag = 0;
+    for (let j = 0; j < data.length; j++) {
+      if (data[j].roomId === roomId) {
+        flag = j;
+        break;
+      }
+    }
+
     for (let i = 0; count < black; i++) {
       const number = Math.floor(Math.random() * 12); //시작할때는 조커가 없어야한다.
-      if (blackCardList[number] === null) {
-        blackCardList[number] = userId;
+
+      if (data[flag].blackCardList[number] === null) {
+        data[flag].blackCardList[number] = userId;
         arr1 = [...arr1, { color: "black", value: number }];
         count++;
       }
@@ -295,8 +302,8 @@ io.on("connection", (socket) => {
     for (let i = 0; count < whiteCard; i++) {
       number = Math.floor(Math.random() * 12);
 
-      if (whiteCardList[number] === null) {
-        whiteCardList[number] = userId;
+      if (data[flag].whiteCardList[number] === null) {
+        data[flag].whiteCardList[number] = userId;
         arr1 = [...arr1, { color: "white", value: number }];
         count++;
       }
@@ -305,12 +312,12 @@ io.on("connection", (socket) => {
     // 카드들의 잔여 갯수 count 해주기.
     countBlack = 0;
     countWhite = 0;
-    for (let i = 0; i < blackCardList.length; i++) {
-      if (blackCardList[i] !== null) {
+    for (let i = 0; i < data[flag].blackCardList.length; i++) {
+      if (data[flag].blackCardList[i] !== null) {
         countBlack++;
       }
 
-      if (whiteCardList[i] !== null) {
+      if (data[flag].whiteCardList[i] !== null) {
         countWhite++;
       }
     }
@@ -329,26 +336,26 @@ io.on("connection", (socket) => {
 
     //유저들의 전체 카드에 대한 정보를 쏴줘야한다.
 
-
     const userIdAndCard = { userId, cards: socket.card }; //기존 변수 부분 TODO: 추후 제거
 
     for (let i = 0; i < data.length; i++) {
-      if (data[i].userId == userId) {
-        data[i].cards = socket.card;
+      if (data[flag].roomData[i].userId == userId) {
+        data[flag].roomData[i].cards = socket.card;
         break;
       }
     }
 
     gamingUser = [...gamingUser, userIdAndCard];
+    console.log(data[flag].roomData);
 
-    if (data.length === 4) {
-      //진행자에 대한 추가 정보가 필요.
+    if (data[flag].roomData.length === 4) {
+      //진행자에 대한 추가 정보가 필요.  첫 스타트 유저에 대한 정보를 보내주면 좋다.
       //user nickname
       //cache 에서 user의 순서를 받아와서 전송
 
       socket
         .to(roomId)
-        .emit("allUsersFirstCard", gamingUser, { countBlack, countWhite });
+        .emit("allUsersFirstCard", data, { countBlack, countWhite });
     }
   });
 
