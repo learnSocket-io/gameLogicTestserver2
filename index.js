@@ -1,4 +1,3 @@
-
 //redis-cli -h redis-game-ro.rbvg10.ng.0001.apn2.cache.amazonaws.com
 const express = require("express");
 const app = express();
@@ -126,7 +125,6 @@ let gamingUser = [];
 //NOTE:
 //console.log(socket.id); sids정보
 
-
 //NOTE: SOCKET IO 시작 부분
 io.on("connection", (socket) => {
   socket["nickName"] = "익명";
@@ -135,8 +133,6 @@ io.on("connection", (socket) => {
 
     // await client.sAdd("fruits", "apple", "orange", "pear", "banana", "apple");
     // await client.sAdd("fruits", "lulu");
-    
-    
 
     //비동기 형식으로 접근해야만 함.
     // await client.set("testCode", "test msg");  ---- O
@@ -296,11 +292,8 @@ io.on("connection", (socket) => {
 
     if (gamingUser.length === 4) {
       //진행자에 대한 추가 정보가 필요.
-      //user nickname
-      //cache 에서 user의 순서를 받아와서 전송
-      socket.to(roomId).emit("allUsersFirstCard", gamingUser);
-    }
-  });
+      //redis-cli -h redis-game-ro.rbvg10.ng.0001.apn2.cache.amazonaws.com
+     
 
   //진행자의 순서에 대한 정보가 필요하다.
   //타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
