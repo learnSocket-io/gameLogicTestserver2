@@ -153,8 +153,43 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join_room", ({ roomId, userId }) => {
+    socket["userId"] = userId;
     socket.join(roomId);
-    const sample = { userId, gameSids: socket.id };
+    //const sample = { userId, gameSids: socket.id };
+    const sample = {
+      roomId,
+      blackCardList: [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      whiteCardList: [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      roomData: [{ userId, gameSids: socket.id }],
+    };
     data.push(sample);
     console.log("입력한 data 값 보기", data);
 
@@ -244,8 +279,6 @@ io.on("connection", (socket) => {
     //흰색 카드의 수 설정.
     const whiteCard = 3 - black;
 
-
-    
     //카드를 먼저 선택해준 후.
     let count = 0;
     let arr1 = [];
@@ -282,7 +315,6 @@ io.on("connection", (socket) => {
       }
     }
 
-
     socket["card"] = arr1;
 
     socket.card
@@ -297,17 +329,19 @@ io.on("connection", (socket) => {
 
     //유저들의 전체 카드에 대한 정보를 쏴줘야한다.
 
-    const userIdAndCard = { userId, cards: socket.card };
-   
+
+    const userIdAndCard = { userId, cards: socket.card }; //기존 변수 부분 TODO: 추후 제거
+
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].userId == userId) {
+        data[i].cards = socket.card;
+        break;
+      }
+    }
+
     gamingUser = [...gamingUser, userIdAndCard];
-    //console.log("test",gamingUser);
-    console.log("data값 호출",data)
-    //console.log("게임유저 저장되는것 확인:", gamingUser);
-    //console.log("length:", gamingUser.length);
 
-    //test를 위한 값 살려놓기
-
-    if (gamingUser.length === 4) {
+    if (data.length === 4) {
       //진행자에 대한 추가 정보가 필요.
       //user nickname
       //cache 에서 user의 순서를 받아와서 전송
