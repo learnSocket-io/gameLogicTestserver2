@@ -91,35 +91,50 @@ const data2 = {
 
 //NOTE: 변수 설정 부분
 let whiteCard = 0;
-let blackCardList = [
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-];
-let whiteCardList = [
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
+let sampleData = [
+  {
+    roomId: 3,
+    blackCardList: [null, 1, 1, 1, 2, 2, 2, null, null, null, null, null, null],
+    whiteCardList: [null, 4, 4, 4, 3, 3, 3, null, null, null, null, null, null],
+    roomData: [
+      {
+        userId: 4,
+        gameSids: "12D73jwD0ioJeJLGAAAD",
+        cards: [
+          { color: "white", value: 1 },
+          { color: "white", value: 2 },
+          { color: "white", value: 3 },
+        ],
+      },
+      {
+        userId: 1,
+        gameSids: "12D73jwD0ioJeJLGAAAD",
+        cards: [
+          { color: "black", value: 1 },
+          { color: "black", value: 2 },
+          { color: "black", value: 3 },
+        ],
+      },
+      {
+        userId: 2,
+        gameSids: "12D73jwD0ioJeJLGAAAD",
+        cards: [
+          { color: "black", value: 4 },
+          { color: "black", value: 5 },
+          { color: "black", value: 6 },
+        ],
+      },
+      {
+        userId: 3,
+        gameSids: "12D73jwD0ioJeJLGAAAD",
+        cards: [
+          { color: "white", value: 4 },
+          { color: "white", value: 5 },
+          { color: "white", value: 6 },
+        ],
+      },
+    ],
+  },
 ];
 
 let countBlack = 0;
@@ -151,6 +166,10 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("receive_message", data.msg);
     addMyMessage(data.msg);
   });
+
+  //dB에 저장한다 속도문제
+  //캐싱 메모리에 저장한다.
+  //유저 socket에 저장한다.
 
   socket.on("join_room", ({ roomId, userId }) => {
     socket["userId"] = userId;
@@ -190,9 +209,8 @@ io.on("connection", (socket) => {
       ],
       roomData: [{ userId, gameSids: socket.id }],
     };
-    console.log("입력받은 값 출력",sample.roomData)
+    console.log("입력받은 값 출력", sample.roomData);
     data.push(sample);
-    
 
     socket.to(roomId).emit("welcome", socket.nickname);
   });
@@ -344,24 +362,21 @@ io.on("connection", (socket) => {
         break;
       }
     }
-    console.log(data)
-    gamingUser = [...gamingUser, userIdAndCard];
-    
-    
+
     if (data[flag].roomData.length === 4) {
       //진행자에 대한 추가 정보가 필요.  첫 스타트 유저에 대한 정보를 보내주면 좋다.
       //user nickname
       //cache 에서 user의 순서를 받아와서 전송
-      console.log("나 들어왔음")
-      console.log(data[flag])
+      console.log("나 들어왔음");
+      console.log(data[flag]);
       socket
         .to(roomId)
-        .emit("allUsersFirstCard", data);
+        .emit("allUsersFirstCard", sampleData, { countBlack, countWhite });
     }
   });
 
   //진행자의 순서에 대한 정보가 필요하다.
-  //타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
+  //가져올 타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
   socket.on("selectCard", (userId, black) => {
     if (black) {
       //black인 경우
