@@ -1,3 +1,6 @@
+// TODO: 한줄씩 가자.
+// TODO: endstate 말고 구현이 먼저
+// TODO: code가 이쁜건 나중에 리팩토링
 //redis-cli -h redis-game-ro.rbvg10.ng.0001.apn2.cache.amazonaws.com
 const express = require("express");
 const app = express();
@@ -292,8 +295,11 @@ io.on("connection", (socket) => {
 
     if (gamingUser.length === 4) {
       //진행자에 대한 추가 정보가 필요.
-      //redis-cli -h redis-game-ro.rbvg10.ng.0001.apn2.cache.amazonaws.com
-     
+      //user nickname
+      //cache 에서 user의 순서를 받아와서 전송
+      socket.to(roomId).emit("allUsersFirstCard", gamingUser);
+    }
+  });
 
   //진행자의 순서에 대한 정보가 필요하다.
   //타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
