@@ -190,8 +190,9 @@ io.on("connection", (socket) => {
       ],
       roomData: [{ userId, gameSids: socket.id }],
     };
-    console.log("입력받은 값 출력", sample.roomData);
+    console.log("입력받은 값 출력",sample.roomData)
     data.push(sample);
+    
 
     socket.to(roomId).emit("welcome", socket.nickname);
   });
@@ -343,16 +344,19 @@ io.on("connection", (socket) => {
         break;
       }
     }
-
+    console.log(data)
     gamingUser = [...gamingUser, userIdAndCard];
-
+    
+    
     if (data[flag].roomData.length === 4) {
       //진행자에 대한 추가 정보가 필요.  첫 스타트 유저에 대한 정보를 보내주면 좋다.
       //user nickname
       //cache 에서 user의 순서를 받아와서 전송
-      console.log("나 들어왔음");
-      console.log(data[flag]);
-      socket.to(roomId).emit("allUsersFirstCard", data);
+      console.log("나 들어왔음")
+      console.log(data[flag])
+      socket
+        .to(roomId)
+        .emit("allUsersFirstCard", data);
     }
   });
 
