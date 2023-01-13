@@ -121,8 +121,9 @@ let whiteCardList = [
   null,
   null,
 ];
-let thisRoom = "";
-let roomState = 0;
+
+let countBlack = 0;
+let countWhite = 0;
 let gamingUser = [];
 
 //NOTE:
@@ -222,24 +223,19 @@ io.on("connection", (socket) => {
 
   //NOTE: 대기방 -> 게임방 으로 입장. 입력받은 룸으로 매칭.
   socket.on("gameStart", (roomId, userId) => {
-    //FIXME 시그널링으로 들어오는 것들을 묶어줘야한다???
-
     //요청하는 사람의 Id 잡기. 화상 소켓 채팅
     socket["userId"] = socket.id;
-    // 화상 sids, 채팅 sids 추가
-    // io에서 room 해당하는 user의 정보를 가져오기.
 
-    //roomId에 해당하는 유저들의 정보를 찾아서 되돌려준다.
     // {nickname: "~~", socket.id: "일반채팅+게임", videoSids:"화상채팅", card:[[],[]], black: 1  }
   });
 
   //NOTE: 게임 로직 구현
   //첫 패를 선택하는 부분
   socket.on("selectFirstCard", ({ userId, black, roomId }, addMyCard) => {
-    console.log("카드를 받아간 user의 정보:", userId);
-    console.log("userId", userId);
-    console.log("black", black);
-    console.log("roomId", roomId);
+    //console.log("카드를 받아간 user의 정보:", userId);
+    //console.log("userId", userId);
+    //console.log("black", black);
+    //console.log("roomId", roomId);
 
     //const a = socket.adapter.rooms
     //TODO: 개인 SIDS로 socket.adapter.rooms 안에 있는 roomID 뽑아보기
@@ -248,6 +244,9 @@ io.on("connection", (socket) => {
     //흰색 카드의 수 설정.
     const whiteCard = 3 - black;
 
+
+    
+    //카드를 먼저 선택해준 후.
     let count = 0;
     let arr1 = [];
     for (let i = 0; count < black; i++) {
@@ -270,6 +269,20 @@ io.on("connection", (socket) => {
       }
     }
 
+    // 카드들의 잔여 갯수 count 해주기.
+    countBlack = 0;
+    countWhite = 0;
+    for (let i = 0; i < blackCardList.length; i++) {
+      if (blackCardList[i] !== null) {
+        countBlack++;
+      }
+
+      if (whiteCardList[i] !== null) {
+        countWhite++;
+      }
+    }
+
+
     socket["card"] = arr1;
 
     socket.card
@@ -284,10 +297,11 @@ io.on("connection", (socket) => {
 
     //유저들의 전체 카드에 대한 정보를 쏴줘야한다.
 
-    const userIdAndCard = { userId, card: socket.card };
-
+    const userIdAndCard = { userId, cards: socket.card };
+   
     gamingUser = [...gamingUser, userIdAndCard];
-    console.log(gamingUser);
+    //console.log("test",gamingUser);
+    console.log("data값 호출",data)
     //console.log("게임유저 저장되는것 확인:", gamingUser);
     //console.log("length:", gamingUser.length);
 
@@ -297,7 +311,10 @@ io.on("connection", (socket) => {
       //진행자에 대한 추가 정보가 필요.
       //user nickname
       //cache 에서 user의 순서를 받아와서 전송
-      socket.to(roomId).emit("allUsersFirstCard", gamingUser);
+
+      socket
+        .to(roomId)
+        .emit("allUsersFirstCard", gamingUser, { countBlack, countWhite });
     }
   });
 
