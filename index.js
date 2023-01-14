@@ -253,13 +253,13 @@ io.on("connection", (socket) => {
     //     return false; // forEach문 종료하기.
     //   }
     // });
-    data.map((el) => {
-      if (el.roomId === roomId) {
-        if (el.roomData.userId === userId) {
-          el.roomData.videoSids = socket.id;
-        }
-      }
-    });
+    // data.map((el) => {
+    //   if (el.roomId === roomId) {
+    //     if (el.roomData.userId === userId) {
+    //       el.roomData.videoSids = socket.id;
+    //     }
+    //   }
+    // });
 
     if (users[roomID]) {
       const length = users[roomID].length;
