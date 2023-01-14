@@ -33,7 +33,7 @@ connectClient()
     console.log(err.message);
   });
 
-//쓰기.
+//쓰기 test.
 client.set("qwer", "qwerqwerqwerqwer");
 
 //hoho 에 "field", "value" 를 넣는다.
@@ -90,7 +90,7 @@ const data2 = {
 };
 
 //NOTE: 변수 설정 부분
-let sample = [];
+
 let whiteCard = 0;
 let sampleData = [
   {
@@ -172,59 +172,34 @@ io.on("connection", (socket) => {
   //캐싱 메모리에 저장한다.
   //유저 socket에 저장한다.
 
-  socket.on("join_room", ({ roomId, userId }) => {
+  socket.on("join_room", ({ roomId, userId, people }) => {
     socket["userId"] = userId;
     //접속했을때 redis에서 userId를 가져올 것인지?
     socket.join(roomId);
     //const sample = { userId, gameSids: socket.id };
 
-    sample.forEach((el) => {
-      if (el.roomId === roomId) {
-        console.log("eleleleleleleleleel", el);
+    if (data.find((el) => el.roomId === roomId)) {
+      data.map((el) => {
+        if (el.roomId === roomId) {
+          el.roomData.push({ userId, gameSids: socket.id });
+        }
+      });
+    } else {
+      //"null,".repeat(13)
+      data.push({
+        roomId,
+        blackCardList: new Array(13).fill(null),
+        whiteCardList: new Array(13).fill(null),
+        roomData: [{ userId, gameSids: socket.id }],
+      });
+    }
+
+    data.map((el) => {
+      if (el.roomId == roomId && el.roomData.length === people) {
+        socket.to(roomId).emit("welcome", data);
+        console.log(data);
       }
     });
-
-    sample = [
-      {
-        roomId,
-        blackCardList: [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
-        whiteCardList: [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
-        roomData: [{ userId, gameSids: socket.id }],
-      },
-    ];
-
-    console.log("입력받은 값 출력", sample);
-    data.push(sample);
-
-    socket.to(roomId).emit("welcome", socket.nickname);
   });
 
   socket.on("nickName", (nickName) => {
@@ -383,7 +358,7 @@ io.on("connection", (socket) => {
       console.log(data[flag]);
       socket
         .to(roomId)
-        .emit("allUsersFirstCard", sampleData, { countBlack, countWhite });
+        .emit("allUsersFirstCard", data, { countBlack, countWhite });
     }
   });
 
