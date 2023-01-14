@@ -1,4 +1,4 @@
-// TODO: 한줄씩 가자.
+// TODO: 한 줄 씩 가자.
 // TODO: endstate 말고 구현이 먼저
 // TODO: code가 이쁜건 나중에 리팩토링
 //redis-cli -h redis-game-ro.rbvg10.ng.0001.apn2.cache.amazonaws.com
@@ -36,14 +36,14 @@ connectClient()
     console.log(err.message);
   });
 
-//쓰기 test.
+// 쓰기 test.
 client.set("qwer", "qwerqwerqwerqwer");
 
-//hoho 에 "field", "value" 를 넣는다.
+// hoho 에 "field", "value" 를 넣는다.
 // client.hSet("hoho", "field", "value");
 // client.hgetall('friends')
 
-//한개씩 추가해야할 때 + 중복 제거도 해줌.
+// 한 개 씩 추가 해야할 때 + 중복 제거도 해 줌.
 // client.sadd('fruits', 'apple', 'orange', 'pear', 'banana', 'apple')
 // client.sadd('fruits', 'lulu')
 // client.smembers('fruits')
@@ -59,41 +59,10 @@ const io = new Server(server, {
 const users = {};
 const socketToRoom = {};
 
-//test code
+// test code
 
+// NOTE: 변수 설정 부분
 const data = [];
-const data2 = {
-  roomId: 3,
-  users: [
-    {
-      userId: 1,
-      gameSids: "일반채팅",
-      videoSids: "화상채팅",
-      card: [],
-    },
-    {
-      userId: 3,
-      gameSids: "일반채팅",
-      videoSids: "화상채팅",
-      card: [],
-    },
-    {
-      userId: 19,
-      gameSids: "일반채팅",
-      videoSids: "화상채팅",
-      card: [],
-    },
-    {
-      userId: 33,
-      gameSids: "일반채팅",
-      videoSids: "화상채팅",
-      card: [],
-    },
-  ],
-};
-
-//NOTE: 변수 설정 부분
-
 let whiteCard = 0;
 let sampleData = [
   {
@@ -145,10 +114,10 @@ let countBlack = 0;
 let countWhite = 0;
 let gamingUser = [];
 
-//NOTE:
-//console.log(socket.id); sids정보
+// NOTE:
+// console.log(socket.id); sids정보
 
-//NOTE: SOCKET IO 시작 부분
+// NOTE: SOCKET IO 시작 부분
 io.on("connection", (socket) => {
   socket["nickName"] = "익명";
   socket.onAny(async (e) => {
@@ -157,7 +126,7 @@ io.on("connection", (socket) => {
     // await client.sAdd("fruits", "apple", "orange", "pear", "banana", "apple");
     // await client.sAdd("fruits", "lulu");
 
-    //비동기 형식으로 접근해야만 함.
+    // 비동기 형식으로 접근해야만 함.
     // await client.set("testCode", "test msg");  ---- O
     // const testCode = await client.get("testCode");  ---- O
     // console.log("testcode 대한 값 표현", testCode);  ---- O
@@ -171,15 +140,11 @@ io.on("connection", (socket) => {
     addMyMessage(data.msg);
   });
 
-  //dB에 저장한다 속도문제
-  //캐싱 메모리에 저장한다.
-  //유저 socket에 저장한다.
-
-  socket.on("join_room", ({ roomId, userId, people = 4 }, gameStartFn) => {
+  socket.on("join_room", ({ roomId, userId, people }, gameStartFn) => {
     socket["userId"] = userId;
-    //접속했을때 redis에서 userId를 가져올 것인지?
+    // 접속했을때 redis에서 userId를 가져올 것인지?
     socket.join(roomId);
-    //const sample = { userId, gameSids: socket.id };
+    // const sample = { userId, gameSids: socket.id };
 
     if (data.find((el) => el.roomId === roomId)) {
       data.map((el) => {
@@ -188,7 +153,8 @@ io.on("connection", (socket) => {
         }
       });
     } else {
-      //"null,".repeat(13)
+      //data가 없다면 새로 생성
+      // "null,".repeat(13) 반복 작업에 대한 구현
       data.push({
         roomId,
         blackCardList: new Array(13).fill(null),
@@ -199,19 +165,21 @@ io.on("connection", (socket) => {
 
     data.map((el) => {
       if (el.roomData.length === people) {
-        //첫 순서 넣기, 마지막 인자 넣기.
-        //명세서 작성하기.
-        socket.to(roomId).emit("gameStart", "gameStart");
+        // 첫 순서 넣기, 마지막 인자 넣기.
+        // 명세서 작성하기.
+
+        
+        
+        socket.to(roomId).emit("gameStart", { test: "test data" });
+        //여기까지 console.log()가 찍히는데 emit이 안먹고 있다......
       }
     });
   });
 
   socket.on("getPlace", ({ roomId, userId, people }, fn) => {
+    console.log("getPlace 실행 확인 콘솔");
     data.map((el) => {
       if (el.roomId == roomId && el.roomData.length === people) {
-        //사용자에 맞게 정보 수정하기. 고민1,
-        //peopel가 다 들어왔을때 -> 정렬해서 -> 모두에게 보내주기.
-        //개개인 맞춤형 부분이 빠졌다.
         console.log("수정해야할 데이터", el.roomData);
         let count = 0;
         let userTemp = [];
@@ -249,7 +217,7 @@ io.on("connection", (socket) => {
     addMyMessage(msg);
   });
 
-  //NOTE: 화상채팅
+  // NOTE: 화상채팅
   socket.on("joinRtcRoom", (roomID) => {
     console.log(roomID);
     if (users[roomID]) {
@@ -290,21 +258,21 @@ io.on("connection", (socket) => {
     }
   });
 
-  //NOTE: 대기방 -> 게임방 으로 입장. 입력받은 룸으로 매칭.
+  // NOTE: 대기방 -> 게임방 으로 입장. 입력받은 룸으로 매칭.
   socket.on("gameStart", (roomId, userId) => {
-    //요청하는 사람의 Id 잡기. 화상 소켓 채팅
+    // 요청하는 사람의 Id 잡기. 화상 소켓 채팅
     socket["userId"] = socket.id;
 
     // {nickname: "~~", socket.id: "일반채팅+게임", videoSids:"화상채팅", card:[[],[]], black: 1  }
   });
 
-  //NOTE: 게임 로직 구현
-  //첫 패를 선택하는 부분
+  // NOTE: 게임 로직 구현
+  // 첫 패를 선택하는 부분
   socket.on("selectFirstCard", ({ userId, black, roomId }, addMyCard) => {
-    //흰색 카드의 수 설정.
+    // 흰색 카드의 수 설정.
     const whiteCard = 3 - black;
 
-    //카드를 먼저 선택해준 후.
+    // 카드를 먼저 선택해준 후.
     let count = 0;
     let arr1 = [];
     let flag = 0;
@@ -361,9 +329,9 @@ io.on("connection", (socket) => {
         }
       });
 
-    //유저들의 전체 카드에 대한 정보를 쏴줘야한다.
+    // 유저들의 전체 카드에 대한 정보를 쏴줘야한다.
 
-    const userIdAndCard = { userId, cards: socket.card }; //기존 변수 부분 TODO: 추후 제거
+    const userIdAndCard = { userId, cards: socket.card }; // 기존 변수 부분 TODO: 추후 제거
 
     for (let i = 0; i < data.length; i++) {
       if (data[flag].roomData[i].userId == userId) {
@@ -373,9 +341,9 @@ io.on("connection", (socket) => {
     }
 
     if (data[flag].roomData.length === 4) {
-      //진행자에 대한 추가 정보가 필요.  첫 스타트 유저에 대한 정보를 보내주면 좋다.
-      //user nickname
-      //cache 에서 user의 순서를 받아와서 전송
+      // 진행자에 대한 추가 정보가 필요.  첫 스타트 유저에 대한 정보를 보내주면 좋다.
+      // user nickname
+      // cache 에서 user의 순서를 받아와서 전송
       console.log("나 들어왔음");
       console.log(data[flag]);
       socket
@@ -384,15 +352,15 @@ io.on("connection", (socket) => {
     }
   });
 
-  //진행자의 순서에 대한 정보가 필요하다.
-  //가져올 타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
+  // 진행자의 순서에 대한 정보가 필요하다.
+  // 가져올 타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
   socket.on("selectCard", (userId, black) => {
     if (black) {
       //black인 경우
       let count = 0;
       let arr1 = [];
       for (let i = 0; count < 1; i++) {
-        //FIXME: 가지고 있는 값 내에서 랜덤을 가져오도록 구현하면 서버에 부담이 줄것이라 생각
+        // FIXME: 가지고 있는 값 내에서 랜덤을 가져오도록 구현하면 서버에 부담이 줄것이라 생각
         const number = Math.floor(Math.random() * 13);
         if (blackCardList[number] === null) {
           blackCardList[number] = userId;
@@ -401,7 +369,7 @@ io.on("connection", (socket) => {
         }
       }
     } else {
-      //white인 경우
+      // white인 경우
       count = 0;
       for (let i = 0; count < 1; i++) {
         number = Math.floor(Math.random() * 13);
@@ -415,8 +383,8 @@ io.on("connection", (socket) => {
     }
   });
 
-  //상대를 지목하는 기능
-  //지목한 상대의 카드들에 대한 정보를 보내줘야 한다.
+  // 상대를 지목하는 기능
+  // 지목한 상대의 카드들에 대한 정보를 보내줘야 한다.
   socket.on("selectUser", (userId, getCard) => {
     for (i = 0; i < gamingUser.length; i++) {
       if (gamingUser[i].userId == userId) {
@@ -427,7 +395,7 @@ io.on("connection", (socket) => {
   });
 });
 
-//http 연결시 3000으로 진행하기 때문에 다른 port 값을 지정한것?
+// http 연결시 3000으로 진행하기 때문에 다른 port 값을 지정한것?
 server.listen(3001, () => {
   console.log("Server is Listening");
 });
