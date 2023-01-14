@@ -165,8 +165,6 @@ io.on("connection", (socket) => {
     // console.log("qwer에 대한 값 표현", qwer);  ---- O
   });
 
-
-  
   socket.on("send_message", (data, addMyMessage) => {
     console.log(data);
     socket.to(data.room).emit("receive_message", data.msg);
@@ -177,7 +175,7 @@ io.on("connection", (socket) => {
   //캐싱 메모리에 저장한다.
   //유저 socket에 저장한다.
 
-  socket.on("join_room", ({ roomId, userId, people=4 }, gameStartFn) => {
+  socket.on("join_room", ({ roomId, userId, people = 4 }, gameStartFn) => {
     socket["userId"] = userId;
     //접속했을때 redis에서 userId를 가져올 것인지?
     socket.join(roomId);
@@ -201,10 +199,9 @@ io.on("connection", (socket) => {
 
     data.map((el) => {
       if (el.roomData.length === people) {
-        
         //첫 순서 넣기, 마지막 인자 넣기.
         //명세서 작성하기.
-        socket.to(roomId).emit("gameStart", "gameStart")
+        socket.to(roomId).emit("gameStart", "gameStart");
       }
     });
   });
@@ -292,7 +289,6 @@ io.on("connection", (socket) => {
       users[roomID] = room;
     }
   });
-});
 
   //NOTE: 대기방 -> 게임방 으로 입장. 입력받은 룸으로 매칭.
   socket.on("gameStart", (roomId, userId) => {
