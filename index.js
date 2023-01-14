@@ -253,22 +253,8 @@ io.on("connection", (socket) => {
   });
 
   //NOTE: 화상채팅
-  socket.on("joinRtcRoom", (roomID, userId) => {
-    //socket.id 랑 userId를 묶어준다
-    // data.forEach((el) => {
-    //   if (el.userId == userId) {
-    //     el.videoSids = socket.id;
-    //     return false; // forEach문 종료하기.
-    //   }
-    // });
-    // data.map((el) => {
-    //   if (el.roomId === roomId) {
-    //     if (el.roomData.userId === userId) {
-    //       el.roomData.videoSids = socket.id;
-    //     }
-    //   }
-    // });
-    // 비동기 일어나는 부분은 try/ catch로 감싸야할것.
+  socket.on("joinRtcRoom", (roomID) => {
+    console.log(roomID);
     if (users[roomID]) {
       const length = users[roomID].length;
       if (length === 4) {
@@ -306,6 +292,7 @@ io.on("connection", (socket) => {
       users[roomID] = room;
     }
   });
+});
 
   //NOTE: 대기방 -> 게임방 으로 입장. 입력받은 룸으로 매칭.
   socket.on("gameStart", (roomId, userId) => {
