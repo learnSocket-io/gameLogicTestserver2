@@ -90,6 +90,7 @@ const data2 = {
 };
 
 //NOTE: 변수 설정 부분
+let sample = [];
 let whiteCard = 0;
 let sampleData = [
   {
@@ -173,43 +174,54 @@ io.on("connection", (socket) => {
 
   socket.on("join_room", ({ roomId, userId }) => {
     socket["userId"] = userId;
+    //접속했을때 redis에서 userId를 가져올 것인지?
     socket.join(roomId);
     //const sample = { userId, gameSids: socket.id };
-    const sample = {
-      roomId,
-      blackCardList: [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-      ],
-      whiteCardList: [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-      ],
-      roomData: [{ userId, gameSids: socket.id }],
-    };
-    console.log("입력받은 값 출력", sample.roomData);
+
+    sample.forEach((el) => {
+      if (el.roomId === roomId) {
+        console.log("eleleleleleleleleel", el);
+      }
+    });
+
+    sample = [
+      {
+        roomId,
+        blackCardList: [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        whiteCardList: [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        roomData: [{ userId, gameSids: socket.id }],
+      },
+    ];
+
+    console.log("입력받은 값 출력", sample);
     data.push(sample);
 
     socket.to(roomId).emit("welcome", socket.nickname);
