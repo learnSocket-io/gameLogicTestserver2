@@ -13,6 +13,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const { createClient } = require("redis");
 const { log } = require("console");
+const e = require("express");
 
 dotenv.config();
 app.use(cors());
@@ -168,8 +169,6 @@ io.on("connection", (socket) => {
         // 첫 순서 넣기, 마지막 인자 넣기.
         // 명세서 작성하기.
 
-        
-        
         socket.to(roomId).emit("gameStart", { test: "test data" });
         //여기까지 console.log()가 찍히는데 emit이 안먹고 있다......
       }
@@ -177,7 +176,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("getPlace", ({ roomId, userId, people }, fn) => {
-    console.log("getPlace 실행 확인 콘솔");
+    userId = 2;
+    people = 3;
     data.map((el) => {
       if (el.roomId == roomId && el.roomData.length === people) {
         console.log("수정해야할 데이터", el.roomData);
@@ -189,7 +189,6 @@ io.on("connection", (socket) => {
             for (let j = 2; j < people; j = (j + 1) % people) {
               userTemp.push(el.roomData[j]);
               count++;
-
               if (count === people) {
                 break;
               }
@@ -276,13 +275,14 @@ io.on("connection", (socket) => {
     let count = 0;
     let arr1 = [];
     let flag = 0;
+
     for (let j = 0; j < data.length; j++) {
       if (data[j].roomId === roomId) {
         flag = j;
         break;
       }
     }
-
+    console.log("flag console test", flag);
     for (let i = 0; count < black; i++) {
       const number = Math.floor(Math.random() * 12); //시작할때는 조커가 없어야한다.
 
@@ -334,6 +334,7 @@ io.on("connection", (socket) => {
     const userIdAndCard = { userId, cards: socket.card }; // 기존 변수 부분 TODO: 추후 제거
 
     for (let i = 0; i < data.length; i++) {
+      //오류난 부분 체크필요 ㄱ
       if (data[flag].roomData[i].userId == userId) {
         data[flag].roomData[i].cards = socket.card;
         break;
@@ -344,8 +345,6 @@ io.on("connection", (socket) => {
       // 진행자에 대한 추가 정보가 필요.  첫 스타트 유저에 대한 정보를 보내주면 좋다.
       // user nickname
       // cache 에서 user의 순서를 받아와서 전송
-      console.log("나 들어왔음");
-      console.log(data[flag]);
       socket
         .to(roomId)
         .emit("allUsersFirstCard", data, { countBlack, countWhite });
@@ -354,7 +353,15 @@ io.on("connection", (socket) => {
 
   // 진행자의 순서에 대한 정보가 필요하다.
   // 가져올 타일을 선택하는 기능. //받은 타일이 조커인지, 숫자인지에 대한 분기가 필요하다.
-  socket.on("selectCard", (userId, black) => {
+  socket.on("selectCard", (roomId ,userId, black) => {
+    for (let j = 0; j < data.length; j++) {
+      if (data[j].roomId === roomId) {
+        flag = j;
+        break;
+      }
+    }
+
+
     if (black) {
       //black인 경우
       let count = 0;
@@ -362,9 +369,9 @@ io.on("connection", (socket) => {
       for (let i = 0; count < 1; i++) {
         // FIXME: 가지고 있는 값 내에서 랜덤을 가져오도록 구현하면 서버에 부담이 줄것이라 생각
         const number = Math.floor(Math.random() * 13);
-        if (blackCardList[number] === null) {
-          blackCardList[number] = userId;
-
+        if (data[flag].blackCardList[number] === null) {
+          data[flag].blackCardList[number] = userId;
+          //FIXME white처럼 카드에 대한 정보를 담기 위한 로직 필요
           count++;
         }
       }
@@ -374,9 +381,13 @@ io.on("connection", (socket) => {
       for (let i = 0; count < 1; i++) {
         number = Math.floor(Math.random() * 13);
 
-        if (whiteCardList[number] === null) {
-          whiteCardList[number] = userId;
-          arr1 = [...arr1, { color: "white", value: number }];
+        if (data[flag].whiteCardList[number] === null) {
+          data[flag].whiteCardList[number] = userId;
+
+          //FIXME: 유저 정보의 index를 찾아서 넣어줘야한다.
+          // 데이터를 어떻게 저장할 것인지 + 상대방에게 안보이게끔 로직을 어떻게 구현할 것인지.
+          // 콜백함수에 대한 리턴과 , 그 외 user들에 대한 카드별 return null 구현 고민
+          //data[flag].roomData[].card = { color: "white", value: number }];
           count++;
         }
       }
@@ -385,6 +396,7 @@ io.on("connection", (socket) => {
 
   // 상대를 지목하는 기능
   // 지목한 상대의 카드들에 대한 정보를 보내줘야 한다.
+  // 지목한 카드의 정보를 비교해서 맞는지 틀린지에 대한 return 필요
   socket.on("selectUser", (userId, getCard) => {
     for (i = 0; i < gamingUser.length; i++) {
       if (gamingUser[i].userId == userId) {
@@ -399,3 +411,4 @@ io.on("connection", (socket) => {
 server.listen(3001, () => {
   console.log("Server is Listening");
 });
+
