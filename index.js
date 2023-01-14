@@ -172,7 +172,7 @@ io.on("connection", (socket) => {
   //캐싱 메모리에 저장한다.
   //유저 socket에 저장한다.
 
-  socket.on("join_room", ({ roomId, userId, people }, gameStartFn) => {
+  socket.on("join_room", ({ roomId, userId, people=4 }, gameStartFn) => {
     socket["userId"] = userId;
     //접속했을때 redis에서 userId를 가져올 것인지?
     socket.join(roomId);
@@ -260,7 +260,7 @@ io.on("connection", (socket) => {
     //     }
     //   }
     // });
-
+    // 비동기 일어나는 부분은 try/ catch로 감싸야할것.
     if (users[roomID]) {
       const length = users[roomID].length;
       if (length === 4) {
