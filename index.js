@@ -2,6 +2,9 @@
 // TODO: endstate 말고 구현이 먼저
 // TODO: code가 이쁜건 나중에 리팩토링
 //redis-cli -h redis-game-ro.rbvg10.ng.0001.apn2.cache.amazonaws.com
+
+//소켓 통신
+// 추가되는 카드만 주고 받기.
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -162,6 +165,8 @@ io.on("connection", (socket) => {
     // console.log("qwer에 대한 값 표현", qwer);  ---- O
   });
 
+
+  
   socket.on("send_message", (data, addMyMessage) => {
     console.log(data);
     socket.to(data.room).emit("receive_message", data.msg);
@@ -196,7 +201,10 @@ io.on("connection", (socket) => {
 
     data.map((el) => {
       if (el.roomData.length === people) {
-        socket.to(roomId).emit("gameStart", "gameStart");
+        
+        //첫 순서 넣기, 마지막 인자 넣기.
+        //명세서 작성하기.
+        socket.to(roomId).emit("gameStart", "gameStart")
       }
     });
   });
