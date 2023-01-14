@@ -169,15 +169,14 @@ io.on("connection", (socket) => {
         // 첫 순서 넣기, 마지막 인자 넣기.
         // 명세서 작성하기.
 
-        socket.to(roomId).emit("gameStart", { test: "test data" });
+        socket.to(roomId).emit("gameStart", "gameStart");
         //여기까지 console.log()가 찍히는데 emit이 안먹고 있다......
       }
     });
   });
 
   socket.on("getPlace", ({ roomId, userId, people }, fn) => {
-    userId = 2;
-    people = 3;
+  
     data.map((el) => {
       if (el.roomId == roomId && el.roomData.length === people) {
         console.log("수정해야할 데이터", el.roomData);
