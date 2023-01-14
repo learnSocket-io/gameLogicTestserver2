@@ -195,17 +195,26 @@ io.on("connection", (socket) => {
     }
 
     data.map((el) => {
+      if (el.roomData.length === people) {
+        socket.to(roomId).emit("gameStart", "gameStart");
+      }
+    });
+  });
+
+  socket.on("getPlace", ({ roomId, userId, people }, fn) => {
+    data.map((el) => {
       if (el.roomId == roomId && el.roomData.length === people) {
         //사용자에 맞게 정보 수정하기. 고민1,
+        //peopel가 다 들어왔을때 -> 정렬해서 -> 모두에게 보내주기.
+        //개개인 맞춤형 부분이 빠졌다.
         console.log("수정해야할 데이터", el.roomData);
         let count = 0;
         let userTemp = [];
 
         for (let i = 0; i < people; i++) {
           if (el.roomData[i].userId === userId) {
-            for (let j = i; j < people; j = (j + 1) % people) {
+            for (let j = 2; j < people; j = (j + 1) % people) {
               userTemp.push(el.roomData[j]);
-              console.log("j의 변화;", j);
               count++;
 
               if (count === people) {
@@ -217,10 +226,9 @@ io.on("connection", (socket) => {
             }
           }
         }
-        console.log("userTemp값 출력", userTemp);
 
-        socket.to(roomId).emit("gameStart", "gameStart", el.roomData);
-        //gameStartFn(el.roomData);
+        el.roomData = userTemp;
+        fn(data);
       }
     });
   });
