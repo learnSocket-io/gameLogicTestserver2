@@ -196,9 +196,31 @@ io.on("connection", (socket) => {
 
     data.map((el) => {
       if (el.roomId == roomId && el.roomData.length === people) {
-        socket.to(roomId).emit("gameStart", "gameStart", data);
-        gameStartFn();
-        console.log(data);
+        //사용자에 맞게 정보 수정하기. 고민1,
+        console.log("수정해야할 데이터", el.roomData);
+        let count = 0;
+        let userTemp = [];
+
+        for (let i = 0; i < people; i++) {
+          if (el.roomData[i].userId === userId) {
+            for (let j = i; j < people; j = (j + 1) % people) {
+              userTemp.push(el.roomData[j]);
+              console.log("j의 변화;", j);
+              count++;
+
+              if (count === people) {
+                break;
+              }
+            }
+            if (count === people) {
+              break;
+            }
+          }
+        }
+        console.log("userTemp값 출력", userTemp);
+
+        socket.to(roomId).emit("gameStart", "gameStart", el.roomData);
+        //gameStartFn(el.roomData);
       }
     });
   });
